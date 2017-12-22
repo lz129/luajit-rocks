@@ -1,9 +1,10 @@
 # -*- cmake -*-
+CMAKE_POLICY(SET CMP0048 NEW)
 
-PROJECT(Lua)
+PROJECT(Lua VERSION 5.3.4)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
-CMAKE_POLICY(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9 FATAL_ERROR)
+CMAKE_POLICY(VERSION 3.9)
 
 SET(CMAKE_MODULE_PATH
   "${CMAKE_CURRENT_SOURCE_DIR}/cmake"
@@ -74,8 +75,8 @@ ENDIF()
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR} src)
 CONFIGURE_FILE(src/luaconf.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h)
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h src/lua.h src/lauxlib.h src/lualib.h src/lua.hpp
-  DESTINATION "${INSTALL_INCLUDE_SUBDIR}")
+#INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h src/lua.h src/lauxlib.h src/lualib.h src/lua.hpp
+ # DESTINATION "${INSTALL_INCLUDE_SUBDIR}")
 
 SET(SRC_LIB src/lapi.c src/lauxlib.c src/lbaselib.c src/lbitlib.c src/lcode.c src/lcorolib.c src/lctype.c
   src/ldblib.c src/ldebug.c src/ldo.c src/ldump.c src/lfunc.c src/lgc.c src/linit.c src/liolib.c src/llex.c
@@ -88,11 +89,17 @@ SET(SRC_LIB src/lapi.c src/lauxlib.c src/lbaselib.c src/lbitlib.c src/lcode.c sr
 ADD_LIBRARY(liblua SHARED ${SRC_LIB})
 SET_TARGET_PROPERTIES(liblua PROPERTIES
   PREFIX "lib" IMPORT_PREFIX "lib" OUTPUT_NAME "lua")
-ADD_EXECUTABLE(lua src/lua.c ${SRC_LIB})
-ADD_EXECUTABLE(luac src/luac.c ${SRC_LIB})
+#  ADD_EXECUTABLE(lua src/lua.c ${SRC_LIB})
+ADD_EXECUTABLE(lua src/lua.c)
+# ADD_EXECUTABLE(luac src/luac.c ${SRC_LIB})
+ADD_EXECUTABLE(luac src/luac.c src/lopcodes.c src/ldump.c)
 TARGET_LINK_LIBRARIES(liblua ${LIBS})
-TARGET_LINK_LIBRARIES(lua ${LIBS})
-TARGET_LINK_LIBRARIES(luac ${LIBS})
+set_target_properties(liblua PROPERTIES VERSION 5.3.4)
+set_target_properties(liblua PROPERTIES SOVERSION 5.3)
+
+
+TARGET_LINK_LIBRARIES(lua liblua ${LIBS})
+TARGET_LINK_LIBRARIES(luac liblua ${LIBS})
 
 # Install files
 INSTALL(TARGETS lua luac liblua
